@@ -1,17 +1,17 @@
-# TODO: change to environment variables
-debug = True
-
-if debug:
-    from flask_restx import Resource, Api
-else:
-    from flask_restful import Resource, Api 
-
 from main import app
+from config import API
 
-api = Api(app)
 
+api = API(app)
+
+
+# ------------------------------- USER ENDPOINTS --------------------------------
 from .user import *
 api.add_resource(User, User.USER_API_PREFIX) # /users
+
+# ------------------------------- OPENAI ENDPOINTS --------------------------------
+from chat import *
+api.add_resource(OpenAI, OpenAI.OPENAI_API_PREFIX) # /openai
 
 
 

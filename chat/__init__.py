@@ -1,14 +1,12 @@
 # app.py
-from flask import Flask, request, jsonify
-from flask_restful import Resource
+from flask import request, jsonify
+from config import RESOUCE
 from .openai_handler import call_gpt_api
-
-app = Flask(__name__)
-
 
 
 # Flask-RESTful resource to handle GPT API requests
-class OpenAI(Resource):
+class OpenAI(RESOUCE):
+    OPENAI_API_PREFIX = '/openai'
     def post(self):
         data = request.get_json()
         prompt = data.get('prompt')
