@@ -1,13 +1,11 @@
 import requests
-
-
-GPT_API_KEY = 'your_gpt_api_key_here'
+from config import OPENAI_KEY
 
 # Function to connect to GPT API
 def call_gpt_api(prompt):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {GPT_API_KEY}',
+        'Authorization': f'Bearer {OPENAI_KEY}',
     }
 
     data = {
