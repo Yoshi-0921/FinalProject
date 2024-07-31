@@ -1,7 +1,9 @@
-from flask_restful import api
-from user import User
+from flask_restful import Resource
 
 
-api.add_resource(User, User.USER_API_PREFIX) # /users
+class User(Resource):
+    USER_API_PREFIX = '/users'
+    def get(self):
+        return {'users': ['Weimeng']}
 
 
