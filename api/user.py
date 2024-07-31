@@ -1,7 +1,7 @@
-from . import Resource
+from config import RESOUCE
 
 
-class User(Resource):
+class User(RESOUCE):
     USER_API_PREFIX = '/users'
     def get(self):
         return {'users': ['Weimeng']}
