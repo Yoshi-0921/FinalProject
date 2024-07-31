@@ -1,9 +1,9 @@
+import pickle
+import sqlite3
 import time
 from datetime import datetime
-import pandas as pd
 
-import sqlite3
-import pickle
+import pandas as pd
 
 conn = sqlite3.connect('market.sqlite')
 

@@ -1,6 +1,8 @@
 # app.py
-from flask import request, jsonify
+from flask import jsonify, request
+
 from config import RESOUCE
+
 from .openai_handler import call_gpt_api
 
 
