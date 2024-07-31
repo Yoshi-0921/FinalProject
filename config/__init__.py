@@ -1,8 +1,9 @@
 import os
-from dotenv import load_dotenv
-from flask_restful import Resource, Api
-from flask_restx import Resource as ResourceX, Api as ApiX
 
+from dotenv import load_dotenv
+from flask_restful import Api, Resource
+from flask_restx import Api as ApiX
+from flask_restx import Resource as ResourceX
 
 load_dotenv()
 
@@ -12,3 +13,5 @@ DEBUG = os.getenv('DEBUG')
 
 RESOUCE = ResourceX if DEBUG else Resource
 API = ApiX if DEBUG else Api
+
+SQLITE_PATH = "static/market/market.sqlite"

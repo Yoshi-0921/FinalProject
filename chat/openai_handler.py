@@ -1,5 +1,7 @@
 import requests
+
 from config import OPENAI_KEY
+
 
 # Function to connect to GPT API
 def call_gpt_api(prompt):
