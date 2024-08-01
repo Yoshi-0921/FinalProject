@@ -148,3 +148,6 @@ $Windows.~WS
 
 # Windows 10 upgrade logs
 *.log
+
+# temporary dataframe pickle
+static/market/*.pkl
