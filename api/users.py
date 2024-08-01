@@ -1,5 +1,6 @@
 from common import AbstractResource
 
+
 class User(AbstractResource):
     END_POINTS = ['/users', '/users/<userid>']
 
