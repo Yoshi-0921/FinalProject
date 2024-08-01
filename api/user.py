@@ -1,15 +1,12 @@
-import sqlite3
-
-from config import RESOUCE, SQLITE_PATH
+from common import AbstractResource
 
 
-class User(RESOUCE):
-    USER_API_PREFIX = '/users/<userid>'
+class User(AbstractResource):
+    API_PREFIX = '/users/<userid>'
+
     def get(self, userid):
-        conn = sqlite3.connect(SQLITE_PATH)
-        cur = conn.cursor()
+        cur = self.get_cursor()
         cur.execute('SELECT * FROM users WHERE userid == ?', [userid])
         result = cur.fetchone()
-        cur.close()
-        conn.close()
+        self.close_cursor()
         return {'users': result}
