@@ -3,7 +3,7 @@ from flask import request
 from . import api
 
 class Stock(AbstractResource):
-    API_PREFIX = '/stocks/<symbol>'
+    END_POINTS = ['/stocks/<symbol>']
 
     @api.doc(params={
         'from': {

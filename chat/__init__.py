@@ -8,7 +8,7 @@ from .openai_handler import call_gpt_api
 
 # Flask-RESTful resource to handle GPT API requests
 class OpenAI(AbstractResource):
-    API_PREFIX = '/openai'
+    END_POINTS = ['/openai']
 
     def post(self):
         data = request.get_json()
