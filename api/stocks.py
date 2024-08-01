@@ -1,6 +1,9 @@
-from common import AbstractResource
 from flask import request
+
+from common import AbstractResource
+
 from . import api
+
 
 class Stock(AbstractResource):
     END_POINTS = ['/stocks/<symbol>']
