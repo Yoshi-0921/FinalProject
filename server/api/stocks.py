@@ -44,7 +44,7 @@ class Stock(AbstractResource):
         print(variable_clause_str)
 
         cur = self.get_cursor()
-        cur.execute('SELECT * FROM stocks WHERE id%? = 0 AND symbol = ?' + variable_clause_str + ' LIMIT ?', [intervalday, symbol, limit])
+        cur.execute('SELECT * FROM stocks WHERE id%? = 0 AND symbol = ?' + variable_clause_str + 'ORDER BY unixtimestamp DESC LIMIT ?', [intervalday, symbol, limit])
         result = cur.fetchall()
         self.close_cursor()
         return {'stocks': result}

@@ -26,7 +26,8 @@ def get_portfolio_returns(userid, datetime=TODAY):
                 'shares': position[3],
                 'return': _return,
                 'rateOfReturn': _return / (position[3] * position[4]),
-                'value': position[3] * ref_prices[position[2]]
+                'value': position[3] * ref_prices[position[2]],
+                'position_time': position[1]
             }
             portfolios[portfolio_ids.index(position[0])].append(status)
 
