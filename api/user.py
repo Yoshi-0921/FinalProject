@@ -2,7 +2,7 @@ from common import AbstractResource
 
 
 class User(AbstractResource):
-    API_PREFIX = '/users/<userid>'
+    END_POINTS = ['/users', '/users/<userid>']
 
     def get(self, userid):
         cur = self.get_cursor()
