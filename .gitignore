@@ -106,7 +106,6 @@ celerybeat.pid
 
 # dotenv
 .env
-.env.*
 
 # macOS specific
 .DS_Store
