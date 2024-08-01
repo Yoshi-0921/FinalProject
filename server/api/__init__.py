@@ -8,7 +8,8 @@ api = API(app)
 # -------------- USER  ---------------
 from .user import *
 
-api.add_resource(User, *User.END_POINTS) # /users
+api.add_resource(User, *User.END_POINTS)
+api.add_resource(UserPositions, *UserPositions.END_POINTS)
 
 # -------------- OPENAI ---------------
 from chat import *
