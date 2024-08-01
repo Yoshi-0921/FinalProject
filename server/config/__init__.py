@@ -15,6 +15,6 @@ DEBUG = os.getenv('DEBUG')
 RESOUCE = ResourceX if DEBUG else Resource
 API = ApiX if DEBUG else Api
 
-SQLITE_PATH = "static/market/market.sqlite"
+SQLITE_PATH = "server/static/market/market.sqlite"
 
 TODAY = datetime(2024, 7, 31, 9, 0, 0)
