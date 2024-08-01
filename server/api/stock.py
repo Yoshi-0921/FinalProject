@@ -1,15 +1,12 @@
-import sqlite3
-
-from config import RESOUCE, SQLITE_PATH
+from common import AbstractResource
 
 
-class Stock(RESOUCE):
-    STOCK_API_PREFIX = '/stocks/<symbol>'
+class Stock(AbstractResource):
+    API_PREFIX = '/stocks/<symbol>'
+
     def get(self, symbol):
-        conn = sqlite3.connect(SQLITE_PATH)
-        cur = conn.cursor()
+        cur = self.get_cursor()
         cur.execute('SELECT * FROM stocks WHERE symbol == ?', [symbol])
         result = cur.fetchmany(100)
-        cur.close()
-        conn.close()
+        self.close_cursor()
         return {'stocks': result}
