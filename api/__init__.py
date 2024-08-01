@@ -7,13 +7,13 @@ api = API(app)
 # ------------------------------- USER ENDPOINTS --------------------------------
 from .user import *
 
-api.add_resource(User, User.USER_API_PREFIX) # /users
+api.add_resource(User, User.API_PREFIX) # /users
 
 # ------------------------------- OPENAI ENDPOINTS --------------------------------
 from chat import *
 
-api.add_resource(OpenAI, OpenAI.OPENAI_API_PREFIX) # /openai
+api.add_resource(OpenAI, OpenAI.API_PREFIX) # /openai
 
 from .stock import *
 
-api.add_resource(Stock, Stock.STOCK_API_PREFIX)
+api.add_resource(Stock, Stock.API_PREFIX)
