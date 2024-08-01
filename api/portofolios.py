@@ -1,7 +1,9 @@
 from common import AbstractResource
+from portfolio import get_portfolio_returns
+
 
 class Portfolio(AbstractResource):
     END_POINTS = ['/portfolios/<username>']
 
     def get(self, username):
-        raise NotImplementedError
+        return get_portfolio_returns(username)
