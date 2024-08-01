@@ -6,7 +6,7 @@ api = API(app)
 
 # ENDPOINTS
 # -------------- USER  ---------------
-from .user import *
+from .users import *
 
 api.add_resource(User, *User.END_POINTS)
 api.add_resource(UserPositions, *UserPositions.END_POINTS)
@@ -17,6 +17,11 @@ from chat import *
 api.add_resource(OpenAI, *OpenAI.END_POINTS)
 
 # -------------- STOCK ---------------
-from .stock import *
+from .stocks import *
 
 api.add_resource(Stock, *Stock.END_POINTS)
+
+# -------------- PORTFOLIO ---------------
+from .portofolios import *
+
+api.add_resource(Portfolio, *Portfolio.END_POINTS)

@@ -1,7 +1,8 @@
-from datetime import datetime
 import sqlite3
-from config import SQLITE_PATH
+from datetime import datetime
 from typing import List
+
+from config import SQLITE_PATH, TODAY
 
 
 def get_table_columns(table_name: str) -> List[str]:
@@ -28,8 +29,10 @@ def get_timestamp(datetime: datetime) -> int:
 
 
 if __name__ == "__main__":
-    ts = convert_ts(1690945011)
-    dt = get_date(ts)
+    # ts = convert_ts(1690945011)
+    dt = get_date(1690945011)
     print(dt)
-    ts = get_timestamp(dt)
+    ts = get_timestamp(datetime(2023,8,2,9,0,0))
+    print(ts)
+    ts = get_timestamp(TODAY)
     print(ts)
