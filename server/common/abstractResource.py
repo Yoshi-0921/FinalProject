@@ -1,5 +1,6 @@
 import sqlite3
 from typing import List
+
 from config import RESOUCE, SQLITE_PATH
 
 
