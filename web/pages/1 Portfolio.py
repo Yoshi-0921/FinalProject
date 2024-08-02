@@ -6,6 +6,7 @@ from common import HIDE_ST_STYLE
 from plotly.subplots import make_subplots
 import numpy as np
 from web.config import NEWS_API_KEY
+from datetime import datetime
 
 st.set_page_config(page_icon=':star', layout='wide')
 
@@ -52,14 +53,15 @@ with portfolio1:
             for s in symbols:
                 stocks = requests.get(f"http://127.0.0.1:5000/stocks/{s}?limit={limit}").json()
                 char_data += returns[0]["stocks"][symbols.index(s)]["shares"] * np.asarray([s[6] for s in stocks["stocks"]])
-            st.area_chart(char_data[::-1], color="#AAAAFF99", height=250)
+            df = pd.DataFrame({'total':char_data, 'timestamp': [datetime.fromtimestamp(s[1]) for s in stocks["stocks"]]})
+            st.area_chart(df, x='timestamp', y='total', color="#AAAAFF99", height=250)
 
             subcol1, subcol2 = st.columns([2,3])
             with subcol1:
                 fig =go.Figure(go.Sunburst(
                     labels=symbols,
                     parents=['stock' for _ in range(len(symbols))],
-                    values=[status['value'] for status in returns[0]["stocks"]],
+                    values=[s['value'] for s in returns[0]["stocks"]],
                 ))
                 fig.update_traces(textinfo="label+percent parent")
                 fig.update_layout(margin = dict(t=0, l=0, r=0, b=0), height=230)
@@ -87,10 +89,10 @@ with portfolio1:
                 vertical_spacing=0.03, subplot_titles=('OHLC', 'Volume'),
                 row_width=[0.2, 0.7])
 
-            candlestick_chart = go.Figure(data=[go.Candlestick(x=bdf['unixtimestamp'],open=bdf['open'], high=bdf['high'], low=bdf['low'], close=bdf['close'], name="Backtest")])
+            candlestick_chart = go.Figure(data=[go.Candlestick(x=[datetime.fromtimestamp(ts) for ts in bdf['unixtimestamp']],open=bdf['open'], high=bdf['high'], low=bdf['low'], close=bdf['close'], name="Backtest")])
             candlestick_chart.update_layout(xaxis_rangeslider_visible=False)
             # candlestick_chart.update_layout(title=f"{symbol} Candlestick Chart", xaxis_rangeslider_visible=False)
-            candlestick_chart.add_traces(go.Candlestick(x=hdf['unixtimestamp'],open=hdf['open'], high=hdf['high'], low=hdf['low'], close=hdf['close'], name="Holding"))
+            candlestick_chart.add_traces(go.Candlestick(x=[datetime.fromtimestamp(ts) for ts in hdf['unixtimestamp']],open=hdf['open'], high=hdf['high'], low=hdf['low'], close=hdf['close'], name="Holding"))
             candlestick_chart.add_hline(y=df['close'][timestamp-1], line_width=2, line_color="tomato")
 
             candlestick_chart.data[0].increasing.fillcolor = '#99703D'
