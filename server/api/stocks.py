@@ -1,6 +1,5 @@
-from flask import request
-
 from common import AbstractResource
+from flask import request
 
 from . import api
 

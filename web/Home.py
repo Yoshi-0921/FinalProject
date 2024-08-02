@@ -1,6 +1,6 @@
-import streamlit as st
-from forex_python.converter import CurrencyRates, CurrencyCodes
 import pandas as pd
+import streamlit as st
+from forex_python.converter import CurrencyCodes, CurrencyRates
 
 st.set_page_config(
     page_title="Hello",

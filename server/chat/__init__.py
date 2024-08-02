@@ -1,11 +1,12 @@
 # app.py
 import sqlite3
+
+from common import AbstractResource
+from config import SQLITE_PATH
 from flask import jsonify, request
 
-from config import SQLITE_PATH
-from common import AbstractResource
-from .openai_handler import call_gpt_api
 from .database_handler import *
+from .openai_handler import call_gpt_api
 
 
 class OpenAI(AbstractResource):

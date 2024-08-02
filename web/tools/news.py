@@ -1,4 +1,6 @@
-import json, requests
+import json
+
+import requests
 
 
 class NewsTools:
