@@ -14,7 +14,13 @@ api.add_resource(UserPositions, *UserPositions.END_POINTS)
 # -------------- OPENAI ---------------
 from chat import *
 
-api.add_resource(OpenAI, *OpenAI.END_POINTS)
+api.add_resource(OpenAI, *OpenAI.END_POINTS)  # / openai
+api.add_resource(
+    OpenAIDatabaseSchema, *OpenAIDatabaseSchema.END_POINTS
+)  # /openai/database
+api.add_resource(
+    OpenAIDatabaseQuery, *OpenAIDatabaseQuery.END_POINTS
+)  # /openai/database/query
 
 # -------------- STOCK ---------------
 from .stocks import *
