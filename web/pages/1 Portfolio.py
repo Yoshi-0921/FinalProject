@@ -4,7 +4,7 @@ import requests
 import streamlit as st
 from common import HIDE_ST_STYLE
 from plotly.subplots import make_subplots
-
+import numpy as np
 from web.config import NEWS_API_KEY
 
 st.set_page_config(page_icon=':star', layout='wide')
@@ -48,10 +48,11 @@ with portfolio1:
             limit = b4.select_slider("Date range", [7, 50, 100, 500, 1000, 2000, 3000, "max"],100)
 
         if symbol == "Net worth":
-            stocks = requests.get(f"http://127.0.0.1:5000/stocks/GOOG?limit={limit}").json()
-            char_data = pd.DataFrame([s[6] for s in stocks["stocks"]])
-            # st.line_chart(char_data, color=(0,0,255))
-            st.area_chart(char_data, color="#AAAAFF99", height=250)
+            char_data = 0
+            for s in symbols:
+                stocks = requests.get(f"http://127.0.0.1:5000/stocks/{s}?limit={limit}").json()
+                char_data += returns[0]["stocks"][symbols.index(s)]["shares"] * np.asarray([s[6] for s in stocks["stocks"]])
+            st.area_chart(char_data[::-1], color="#AAAAFF99", height=250)
 
             subcol1, subcol2 = st.columns([2,3])
             with subcol1:
