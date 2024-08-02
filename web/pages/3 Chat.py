@@ -9,7 +9,7 @@ if "OPENAI_API_KEY" not in st.session_state:
 
 
 openai_api_key = None
-st.session_state["OPENAI_API_KEY"] = openai_api_key
+# st.session_state["OPENAI_API_KEY"] = openai_api_key
 
 
 def set_api_key():
