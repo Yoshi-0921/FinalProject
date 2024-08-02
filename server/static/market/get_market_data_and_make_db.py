@@ -5,6 +5,8 @@ from datetime import datetime
 
 import pandas as pd
 
+from math import isnan
+
 conn = sqlite3.connect('market.sqlite')
 
 # need to execute once on local environment
@@ -20,13 +22,15 @@ def insert_into_db(symbol):
     df = pd.read_pickle(symbol + ".pkl")
     cur = conn.cursor()
     for date, row in df.iterrows():
-        query = "INSERT INTO stocks(unixtimestamp, symbol, open, high, low, close, adjVolume, volume) VALUES ('{}', '{}', {}, {}, {}, {}, {}, {})".format(int(date.timestamp()), str(symbol), row['Open'], row['High'], row['Low'], row['Close'], row['Adj Close'], row['Volume'])
+        if isnan(row['Open']) or isnan(row['High']) or isnan(row['Low']) or isnan(row['Close']) or isnan(row['Adj Close']):
+            continue
+        query = "INSERT INTO stocks(unixtimestamp, symbol, open, high, low, close, adjVolume, volume) VALUES ('{}', '{}', {}, {}, {}, {}, {}, {})".format(int(date.timestamp()), str(symbol), row['Open'], row['High'], row['Low'], row['Close'], row['Adj Close'], 0)
         cur.execute(query)
     conn.commit()
 
-#symbols = ["NVDA", "AAPL", "MS"]
-symbols = ["MSFT", "AMZN", "TSLA", "META", "GOOG", "BRK-B", "XOM", "JNJ", "ARM"]
+symbols = ["NVDA", "AAPL", "MS", "MSFT", "AMZN", "TSLA", "META", "GOOG", "BRK-B", "XOM", "JNJ", "ARM", "^TNX"]
+
 for symbol in symbols:
-    save_market_data(symbol)
+    # save_market_data(symbol)
     insert_into_db(symbol)
 conn.close()
