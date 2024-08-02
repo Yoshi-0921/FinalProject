@@ -23,10 +23,10 @@ HIDE_ST_STYLE = """
                 height: 0%;
                 }
                         .appview-container .main .block-container{
-                            padding-top: 1rem;
+                            padding-top: 0rem;
                             padding-right: 3rem;
                             padding-left: 3rem;
-                            padding-bottom: 1rem;
+                            padding-bottom: 0rem;
                         }
                         .reportview-container {
                             padding-top: 0rem;

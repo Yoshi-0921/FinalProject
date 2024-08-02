@@ -1,10 +1,11 @@
-import itertools
 import inspect
+import itertools
 from types import FunctionType
 
 from utils import get_server_database_schema
-from .news import NewsTools
+
 from .database import DatabaseTools
+from .news import NewsTools
 
 TOOL_CATEGORIES = [NewsTools, DatabaseTools]
 

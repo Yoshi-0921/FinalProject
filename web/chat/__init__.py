@@ -1,9 +1,8 @@
 import json
+
 import streamlit as st
 from openai import OpenAI
-
 from tools import AVAILABLE_TOOLS, get_tool_list
-
 
 MESSAGE_SESSION = "message_session"
 MODEL = "gpt-4o"

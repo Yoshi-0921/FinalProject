@@ -1,6 +1,5 @@
 import requests
-from cachetools import cached
-from cachetools import TTLCache
+from cachetools import TTLCache, cached
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=86400))
