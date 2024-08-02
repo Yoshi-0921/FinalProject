@@ -1,20 +1,20 @@
 import json
-
 import requests
 
 
-class NewsTools:
-    def _get_news(company):
-        api_key = "YOUR_NEWS_API_KEY"
-        url = f"https://newsapi.org/v2/everything?q={company}&apiKey={api_key}"
-        response = requests.get(url)
-        news_data = response.json()
-        return {company: news_data["articles"]}
+def get_news(company):
+    api_key = "YOUR_NEWS_API_KEY"
+    url = f"https://newsapi.org/v2/everything?q={company}&apiKey={api_key}"
+    response = requests.get(url)
+    news_data = response.json()
+    return {company: news_data["articles"]}
 
-    # @staticmethod
-    # def get_news(companies):
-    #     news_data_list =
-    #     return json.dumps({"results": location, "temperature": "unknown"})
+
+class NewsTools:
+    @staticmethod
+    def get_news_all(companies):
+        news_data_list = [get_news(company) for company in companies]
+        return json.dumps({"results": news_data_list})
 
     @staticmethod
     def get_current_weather(location, unit="fahrenheit"):

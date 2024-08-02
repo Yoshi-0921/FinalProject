@@ -1,15 +1,17 @@
 import sys
-
 import streamlit as st
+from config import OPENAI_API_KEY
 from chat import OpenAIClientWrapper
+
 
 # # Initialize session state if not already done
 if "OPENAI_API_KEY" not in st.session_state:
     st.session_state["OPENAI_API_KEY"] = None
 
 
-openai_api_key = None
-# st.session_state["OPENAI_API_KEY"] = openai_api_key
+openai_api_key = OPENAI_API_KEY
+if openai_api_key:
+    st.session_state["OPENAI_API_KEY"] = openai_api_key
 
 
 def set_api_key():
