@@ -1,8 +1,8 @@
 import sys
-import streamlit as st
-from config import OPENAI_API_KEY
-from chat import OpenAIClientWrapper
 
+import streamlit as st
+from chat import OpenAIClientWrapper
+from config import OPENAI_API_KEY
 
 # # Initialize session state if not already done
 if "OPENAI_API_KEY" not in st.session_state:

@@ -1,12 +1,14 @@
+from datetime import datetime
+
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import requests
 import streamlit as st
 from common import HIDE_ST_STYLE
 from plotly.subplots import make_subplots
-import numpy as np
+
 from web.config import NEWS_API_KEY
-from datetime import datetime
 
 st.set_page_config(page_icon=':star', layout='wide')
 
@@ -70,9 +72,10 @@ with portfolio1:
             with subcol2:
                 import numpy as np
                 df = pd.DataFrame(
-                    np.random.randn(10, 5), columns=("col %d" % i for i in range(5))
+                    returns[0]["stocks"]
                 )
-                st.dataframe(df, height=230)
+                df = df.drop(columns=['position_time'])
+                st.dataframe(df, key="symbol", hide_index=True, height=230)
 
         else:
             stocks = requests.get(f"http://127.0.0.1:5000/stocks/{symbol}?limit={limit}").json()
