@@ -20,7 +20,7 @@ with portfolio1:
     COL1, COL2 = st.columns([3,2])
     with COL1:
         returns = requests.get(f"http://127.0.0.1:5000/returns/{userid}").json()
-        symbols = list(set(status["symbol"] for status in returns[0]["stocks"]))
+        symbols = sorted(list(set(status["symbol"] for status in returns[0]["stocks"])))
 
         col1, col2 = st.columns([3,1])
         with col1:
