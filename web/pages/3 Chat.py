@@ -1,60 +1,53 @@
 import sys
 import streamlit as st
-from openai import OpenAI
+from chat import OpenAIClientWrapper
 
-print(sys.version)
+
+# # Initialize session state if not already done
+if "OPENAI_API_KEY" not in st.session_state:
+    st.session_state["OPENAI_API_KEY"] = None
+
 
 openai_api_key = None
+# st.session_state["OPENAI_API_KEY"] = openai_api_key
 
-st.markdown(
-    """
-    <style>
-    .css-1n76uvr {
-        display: flex;
-        align-items: flex-end;
-    }
-    .css-1n76uvr > div:first-child {
-        flex-grow: 1;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
-if not openai_api_key:
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        openai_api_key = st.text_input(
-            label="**OpenAI API Key**",
-            key="chatbot_api_key",
-            type="password",
-        )
-    with col2:
-        st.button("Submit")
+def set_api_key():
+    st.session_state["OPENAI_API_KEY"] = openai_api_key
+
+
+# TODO: DELETE DURIAN PLEASE
+card_number = None
+if "card_number" not in st.session_state:
+    st.session_state["card_number"] = ""
+
+
+def set_durian():
+    st.session_state["card_number"] = card_number
+
+
+# TODO: DELETE DURIAN PLEASE
+
+
+# Input field and button for the API key
+if not st.session_state["OPENAI_API_KEY"]:
+    openai_api_key = st.text_input(
+        label="**OpenAI API Key**",
+        key="chatbot_api_key",
+        type="password",
+    )
+    st.button("Submit", type="primary", on_click=set_api_key)
     st.markdown(
-        "```Please add your OpenAI API key to continue. And your own key without Jerry's credit card please.```"
+        "> Please add your OpenAI API key to continue. And your own key without Jerry's credit card please."
     )
 
+# TODO: DELETE DURIAN PLEASE
+elif not "DURIAN" in st.session_state["card_number"]:
+    card_number = st.text_input(
+        "Any card number that does not belong to Jerry", max_chars=20
+    )
+    st.button("PAY", type="primary", on_click=set_durian)
+# TODO: DELETE DURIAN PLEASE
 else:
-    if "messages" not in st.session_state:
-        st.session_state["messages"] = [
-            {
-                "role": "assistant",
-                "content": "Let me help you achieve Financial Indepent & Retire Early",
-            }
-        ]
-
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
-
-    if prompt := st.chat_input():
-
-        client = OpenAI(api_key=openai_api_key)
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.chat_message("user").write(prompt)
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo", messages=st.session_state.messages
-        )
-        msg = response.choices[0].message.content
-        st.session_state.messages.append({"role": "assistant", "content": msg})
-        st.chat_message("assistant").write(msg)
+    client = OpenAIClientWrapper(api_key=st.session_state["OPENAI_API_KEY"])
+    client.start_chat_session()
