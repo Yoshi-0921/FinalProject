@@ -2,10 +2,9 @@ import pickle
 import sqlite3
 import time
 from datetime import datetime
+from math import isnan
 
 import pandas as pd
-
-from math import isnan
 
 conn = sqlite3.connect('market.sqlite')
 

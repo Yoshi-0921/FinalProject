@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -98,10 +101,9 @@ with portfolio1:
             with subcol2:
                 import numpy as np
 
-                df = pd.DataFrame(
-                    np.random.randn(10, 5), columns=("col %d" % i for i in range(5))
-                )
-                st.dataframe(df, height=230)
+                df = pd.DataFrame(returns[0]["stocks"])
+                df = df.drop(columns=["position_time"])
+                st.dataframe(df, key="symbol", hide_index=True, height=230)
 
         else:
             stocks = requests.get(
