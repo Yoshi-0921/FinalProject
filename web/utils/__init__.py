@@ -1,5 +1,6 @@
 import requests
 from cachetools import TTLCache, cached
+from datetime import datetime, timedelta
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=86400))
@@ -16,3 +17,18 @@ def get_server_database_schema():
     )
     print(database_schema_string)
     return database_schema_string
+
+
+def get_last_month_date():
+    today = datetime.today()
+    first_day_of_current_month = today.replace(day=1)
+    last_day_of_last_month = first_day_of_current_month - timedelta(days=1)
+    return last_day_of_last_month.strftime("%Y-%m-%d")
+
+
+def add_metadata(metadata):
+    def decorator(func):
+        func.tool_call_metadata = metadata
+        return func
+
+    return decorator

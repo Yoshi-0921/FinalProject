@@ -2,7 +2,7 @@ import json
 
 import streamlit as st
 from openai import OpenAI
-from tools import AVAILABLE_TOOLS, get_tool_list
+from tools import AVAILABLE_TOOLS, OPENAI_TOOL_CALLS
 
 MESSAGE_SESSION = "message_session"
 MODEL = "gpt-4o"
@@ -34,7 +34,8 @@ class OpenAIClientWrapper:
 
     # -------------------------------- handlers --------------------------------
     def _ask_openai(self):
-        tool_list = get_tool_list()
+        tool_list = OPENAI_TOOL_CALLS
+        print("_ask_openai", tool_list)
         response = self.client.chat.completions.create(
             model=MODEL,
             messages=st.session_state[MESSAGE_SESSION],
@@ -63,13 +64,17 @@ class OpenAIClientWrapper:
             function_to_call = AVAILABLE_TOOLS[function_name]
             function_args = json.loads(tool_call.function.arguments)
             function_response = function_to_call(**function_args)
-            print(function_response, isinstance(function_response, str))
+            print(
+                "FUNCTION RESPONSE",
+                function_response,
+                isinstance(function_response, str),
+            )
             st.session_state[MESSAGE_SESSION].append(
                 {
                     "tool_call_id": tool_call.id,
                     "role": ChatRole.TOOL,
                     "name": function_name,
-                    "content": function_response,
+                    "content": str(function_response),
                 }
             )
 
@@ -83,7 +88,9 @@ class OpenAIClientWrapper:
 
     def _display_all_messages(self):
         for msg in st.session_state[MESSAGE_SESSION]:
-            if isinstance(msg, dict):
+            if isinstance(msg, dict) and (
+                msg["role"] in [ChatRole.ASSISTANT, ChatRole.USER]
+            ):
                 st.chat_message(msg["role"]).write(msg["content"])
 
     def _add_message(self, role, content):
