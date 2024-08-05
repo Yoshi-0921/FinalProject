@@ -8,7 +8,8 @@ import requests
 from datetime import datetime
 import streamlit as st
 import numpy as np
-
+from ta.trend import MACD
+from ta.momentum import StochasticOscillator
 
 from common import HIDE_ST_STYLE
 from config import NEWS_API_KEY
@@ -23,6 +24,7 @@ portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
 portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Prtfolio3"])
 limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "5Y": 1825, "Max": 9999}
+# limit_conversion = {k: v + 20 for k, v in limit_conversion.items()}
 
 with portfolio1:
     COL1, COL2 = st.columns([3, 2])
@@ -111,7 +113,7 @@ with portfolio1:
                 f"http://127.0.0.1:5000/stocks/{symbol}?limit={limit_conversion[limit]}"
             ).json()
             df = pd.DataFrame(
-                stocks["stocks"],
+                stocks["stocks"][::-1],
                 columns=[
                     "id",
                     "unixtimestamp",
@@ -126,6 +128,8 @@ with portfolio1:
                     "updated_at",
                 ],
             )
+            df['MA20'] = df['close'].rolling(window=20).mean() # .shift(-19)
+            df['MA5'] = df['close'].rolling(window=5).mean() # .shift(-4)
             timestamps = [ts for ts in df["unixtimestamp"]]
             try:
                 timestamp = timestamps.index(status["position_time"])
@@ -134,55 +138,89 @@ with portfolio1:
             bdf = df[timestamp:]
             hdf = df[:timestamp]
 
-            fig = make_subplots(
-                rows=2,
-                cols=1,
-                shared_xaxes=True,
-                vertical_spacing=0.03,
-                subplot_titles=("OHLC", "Volume"),
-                row_width=[0.2, 0.7],
-            )
+            macd = MACD(close=df['close'],
+                    window_slow=26,
+                    window_fast=12,
+                    window_sign=9)
+            stoch = StochasticOscillator(high=df['high'],
+                                        close=df['close'],
+                                        low=df['low'],
+                                        window=14,
+                                        smooth_window=3)
 
-            candlestick_chart = go.Figure(
-                data=[
-                    go.Candlestick(
+            fig = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.40,0.2,0.2,0.20])
+            fig.add_trace(
+                go.Candlestick(
                         x=[datetime.fromtimestamp(ts) for ts in bdf["unixtimestamp"]],
                         open=bdf["open"],
                         high=bdf["high"],
                         low=bdf["low"],
                         close=bdf["close"],
                         name="Backtest",
-                    )
-                ]
-            )
-            candlestick_chart.update_layout(xaxis_rangeslider_visible=False)
-            # candlestick_chart.update_layout(title=f"{symbol} Candlestick Chart", xaxis_rangeslider_visible=False)
-            candlestick_chart.add_traces(
+                        increasing={'fillcolor': "#99703D", 'line':{"color": "#99703D"}},
+                        decreasing={'fillcolor': "#4136FF", 'line':{"color": "#4136FF"}}
+                    ), row=1, col=1)
+            fig.add_trace(
                 go.Candlestick(
-                    x=[datetime.fromtimestamp(ts) for ts in hdf["unixtimestamp"]],
-                    open=hdf["open"],
-                    high=hdf["high"],
-                    low=hdf["low"],
-                    close=hdf["close"],
-                    name="Holding",
-                )
+                        x=[datetime.fromtimestamp(ts) for ts in hdf["unixtimestamp"]],
+                        open=hdf["open"],
+                        high=hdf["high"],
+                        low=hdf["low"],
+                        close=hdf["close"],
+                        name="Holding",
+                        increasing={'fillcolor': "#3D9970", 'line':{"color": "#3D9970"}},
+                        decreasing={'fillcolor': "#FF4136", 'line':{"color": "#FF4136"}}
+                    ), row=1, col=1
             )
-            candlestick_chart.add_hline(
-                y=df["close"][timestamp - 1], line_width=2, line_color="tomato"
+            fig.add_trace(
+                go.Scatter(
+                        x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                        y=df['MA5'],
+                        opacity=0.7,
+                        line=dict(color='blue', width=2),
+                        name='MA 5'
+                    ), row=1, col=1
+            )
+            fig.add_trace(
+                go.Scatter(
+                        x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                        y=df['MA20'],
+                        opacity=0.7,
+                        line=dict(color='orange', width=2),
+                        name='MA 20'
+                    ), row=1, col=1
             )
 
-            candlestick_chart.data[0].increasing.fillcolor = "#99703D"
-            candlestick_chart.data[0].increasing.line.color = "#99703D"
-            candlestick_chart.data[0].decreasing.fillcolor = "#4136FF"
-            candlestick_chart.data[0].decreasing.line.color = "#4136FF"
-            candlestick_chart.data[1].increasing.fillcolor = "#3D9970"
-            candlestick_chart.data[1].increasing.line.color = "#3D9970"
-            candlestick_chart.data[1].decreasing.fillcolor = "#FF4136"
-            candlestick_chart.data[1].decreasing.line.color = "#FF4136"
-            candlestick_chart.update_layout(
-                margin={"t": 0, "l": 0, "b": 0, "r": 0}, height=250
+            fig.add_trace(go.Bar(x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                                y=df['volume']
+                                ), row=2, col=1)
+            # Plot MACD trace on 3rd row
+            fig.add_trace(go.Bar(x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                                y=macd.macd_diff()
+                                ), row=3, col=1)
+            fig.add_trace(go.Scatter(x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                                    y=macd.macd(),
+                                    line=dict(color='black', width=2)
+                                    ), row=3, col=1)
+            fig.add_trace(go.Scatter(x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                                    y=macd.macd_signal(),
+                                    line=dict(color='blue', width=1)
+                                    ), row=3, col=1)
+            # Plot stochastics trace on 4th row
+            fig.add_trace(go.Scatter(x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                                    y=stoch.stoch(),
+                                    line=dict(color='black', width=2)
+                                    ), row=4, col=1)
+            fig.add_trace(go.Scatter(x=[datetime.fromtimestamp(ts) for ts in timestamps],
+                                    y=stoch.stoch_signal(),
+                                    line=dict(color='blue', width=1)
+                                    ), row=4, col=1)
+
+            fig.update_layout(
+                xaxis_rangeslider_visible=False,showlegend=False,
+                margin={"t": 0, "l": 0, "b": 0, "r": 0}, height=500
             )
-            st.plotly_chart(candlestick_chart, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
 
     with COL2:
         feed = 4
