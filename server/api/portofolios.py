@@ -67,7 +67,7 @@ FROM stocks JOIN positions ON stocks.symbol = positions.symbol WHERE positions.p
         # multiply 250 to make it yearly rate
         # calc stats.lognorm numpy params
         s = sig**2*250
-        scale = (muday - 0.5*sig**2)*250
+        scale = numpy.exp((muday - 0.5*sig**2)*250)
 
         return {'s': s, 'scale': scale}
 
