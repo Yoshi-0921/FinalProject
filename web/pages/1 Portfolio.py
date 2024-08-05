@@ -22,6 +22,7 @@ userid = "weimeng"
 portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
 portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Prtfolio3"])
+limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "5Y": 1825, "Max": 9999}
 
 with portfolio1:
     COL1, COL2 = st.columns([3, 2])
@@ -48,29 +49,29 @@ with portfolio1:
             b2.metric("Return", "$" + f"{status['return']:.2f}")
             b3.metric("Share", f"{status['shares']}")
             limit = b4.select_slider(
-                "Date range", [7, 50, 100, 500, 1000, 2000, 3000, "max"], 100
+                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M"
             )
         else:
             _value, _return = 0, 0
             for status in returns[0]["stocks"]:
                 _value += status["value"]
                 _return += status["return"]
-            b1, b2, b4 = st.columns(3)
+            b1, b2, b3 = st.columns(3)
             b1.metric(
                 "Value",
                 "$" + f"{_value:.2f}",
                 f"{100*_return/(_value-_return):.2f}" + "%",
             )
             b2.metric("Return", "$" + f"{_return:.2f}")
-            limit = b4.select_slider(
-                "Date range", [7, 50, 100, 500, 1000, 2000, 3000, "max"], 100
+            limit = b3.select_slider(
+                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M"
             )
 
         if symbol == "Net worth":
             char_data = 0
             for s in symbols:
                 stocks = requests.get(
-                    f"http://127.0.0.1:5000/stocks/{s}?limit={limit}"
+                    f"http://127.0.0.1:5000/stocks/{s}?limit={limit_conversion[limit]}"
                 ).json()
                 char_data += returns[0]["stocks"][symbols.index(s)][
                     "shares"
@@ -107,7 +108,7 @@ with portfolio1:
 
         else:
             stocks = requests.get(
-                f"http://127.0.0.1:5000/stocks/{symbol}?limit={limit}"
+                f"http://127.0.0.1:5000/stocks/{symbol}?limit={limit_conversion[limit]}"
             ).json()
             df = pd.DataFrame(
                 stocks["stocks"],
