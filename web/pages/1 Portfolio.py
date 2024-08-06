@@ -22,26 +22,27 @@ st.markdown(HIDE_ST_STYLE, unsafe_allow_html=True)
 userid = "weimeng"
 portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
-portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Prtfolio3"])
+portfolio1, portfolio2 = st.tabs(["Portfolio1", "Portfolio2"])
 limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "5Y": 1825, "Max": 9999}
-# limit_conversion = {k: v + 20 for k, v in limit_conversion.items()}
+company_conversion = {"AAPL": "Apple Inc", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index"}
 
-with portfolio1:
+def portfolio_page(portfolio_idx):
+    import numpy as np
     COL1, COL2 = st.columns([3, 2])
     with COL1:
         returns = requests.get(f"http://127.0.0.1:5000/returns/{userid}").json()
-        symbols = sorted(list(set(status["symbol"] for status in returns[0]["stocks"])))
+        symbols = sorted(list(set(status["symbol"] for status in returns[portfolio_idx]["stocks"])))
 
         col1, col2 = st.columns([3, 1])
         with col1:
-            st.header(f"{portfolios['portfolio'][0][1]}")
+            st.header(f"{portfolios['portfolio'][portfolio_idx][1]}")
         with col2:
             symbol = st.selectbox(
                 "",
                 ("Net worth", *symbols),
             )
         if symbol != "Net worth":
-            status = returns[0]["stocks"][symbols.index(symbol)]
+            status = returns[portfolio_idx]["stocks"][symbols.index(symbol)]
             b1, b2, b3, b4 = st.columns(4)
             b1.metric(
                 "Value",
@@ -51,11 +52,11 @@ with portfolio1:
             b2.metric("Return", "$" + f"{status['return']:.2f}")
             b3.metric("Share", f"{status['shares']}")
             limit = b4.select_slider(
-                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M"
+                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M", key=f"select_slider_stock_{portfolio_idx}"
             )
         else:
             _value, _return = 0, 0
-            for status in returns[0]["stocks"]:
+            for status in returns[portfolio_idx]["stocks"]:
                 _value += status["value"]
                 _return += status["return"]
             b1, b2, b3 = st.columns(3)
@@ -66,7 +67,7 @@ with portfolio1:
             )
             b2.metric("Return", "$" + f"{_return:.2f}")
             limit = b3.select_slider(
-                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M"
+                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M", key=f"select_slider_{portfolio_idx}"
             )
 
         if symbol == "Net worth":
@@ -75,7 +76,7 @@ with portfolio1:
                 stocks = requests.get(
                     f"http://127.0.0.1:5000/stocks/{s}?limit={limit_conversion[limit]}"
                 ).json()
-                char_data += returns[0]["stocks"][s_idx][
+                char_data += returns[portfolio_idx]["stocks"][s_idx][
                     "shares"
                 ] * np.asarray([s[6] for s in stocks["stocks"]])
             df = pd.DataFrame(
@@ -94,7 +95,7 @@ with portfolio1:
                     go.Sunburst(
                         labels=symbols,
                         parents=["stock" for _ in range(len(symbols))],
-                        values=[s["value"] for s in returns[0]["stocks"]],
+                        values=[s["value"] for s in returns[portfolio_idx]["stocks"]],
                     )
                 )
                 fig.update_traces(textinfo="label+percent parent")
@@ -104,7 +105,7 @@ with portfolio1:
             with subcol2:
                 import numpy as np
 
-                df = pd.DataFrame(returns[0]["stocks"])
+                df = pd.DataFrame(returns[portfolio_idx]["stocks"])
                 df = df.drop(columns=["position_time"])
                 st.dataframe(df, key="symbol", hide_index=True, height=230)
 
@@ -229,7 +230,6 @@ with portfolio1:
         if symbol == "Net worth":
             query = "Market today"
         else:
-            company_conversion = {"AAPL": "Apple Inc", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft"}
             query = f"{company_conversion[symbol]}"
         news = requests.get(
             f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
@@ -240,7 +240,6 @@ with portfolio1:
             url = story["url"]
             urlToImage = story["urlToImage"]
             publishedAt = story["publishedAt"]
-            # publishedAt = format_date(story["publishedAt"])
 
             if title is not None and urlToImage is not None and publishedAt is not None:
                 col1, col2 = st.columns([1, 3])
@@ -252,28 +251,8 @@ with portfolio1:
                     st.text(publishedAt)
                 st.markdown("""---""")
 
-with portfolio2:
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.header("Portfolio 2")
-    # with col2:
-    # symbol = st.selectbox(
-    #     "",
-    #     ("Net worth", ),
-    # )
-    stocks = requests.get(f"http://127.0.0.1:5000/stocks/GOOG").json()
-    char_data = pd.DataFrame([s[6] for s in stocks["stocks"]])
-    st.line_chart(char_data)
+with portfolio1:
+    portfolio_page(0)
 
-with portfolio3:
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.header("Portfolio 3")
-    # with col2:
-    #     symbol = st.selectbox(
-    #         "",
-    #         ("Net worth", ),
-    #     )
-    stocks = requests.get(f"http://127.0.0.1:5000/stocks/MSFT").json()
-    char_data = pd.DataFrame([s[6] for s in stocks["stocks"]])
-    st.line_chart(char_data)
+with portfolio2:
+    portfolio_page(1)
