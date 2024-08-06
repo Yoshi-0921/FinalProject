@@ -33,6 +33,7 @@ from .portofolios import *
 api.add_resource(Portfolio, *Portfolio.END_POINTS)
 api.add_resource(PortfolioShares, *PortfolioShares.END_POINTS)
 api.add_resource(PortfolioGBMParam, *PortfolioGBMParam.END_POINTS)
+api.add_resource(PortfolioGBMParamFast, *PortfolioGBMParamFast.END_POINTS)
 api.add_resource(PortfolioReturns, *PortfolioReturns.END_POINTS)
 
 # ------------- MATH ---------------

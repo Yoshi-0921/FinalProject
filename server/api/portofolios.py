@@ -1,7 +1,21 @@
 from common import AbstractResource
 from portfolio import get_portfolio_returns
 from scipy import stats
+from functools import wraps
+import time
 import numpy
+
+# For profiling
+def timeit(func):
+    @wraps(func)
+    def timeit_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        print(f'Function {func.__name__}{args} {kwargs} Took {total_time:.4f} seconds')
+        return result
+    return timeit_wrapper
 
 class PortfolioReturns(AbstractResource):
     END_POINTS = ['/returns/<userid>']
@@ -26,6 +40,7 @@ class PortfolioGBMParam(AbstractResource):
     # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
     END_POINTS = ['/portfolios/<portfolioid>/gbmparam']
 
+    @timeit
     def get(self, portfolioid):
         cur = self.get_cursor()
         shares = portfolio_shares(cur, portfolioid)
@@ -70,6 +85,65 @@ FROM stocks JOIN positions ON stocks.symbol = positions.symbol WHERE positions.p
         scale = numpy.exp((muday - 0.5*sig**2)*250)
 
         return {'s': s, 'scale': scale}
+
+class PortfolioGBMParamFast(AbstractResource):
+    # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
+    END_POINTS = ['/portfolios/<portfolioid>/gbmparamfast']
+
+    @timeit
+    def get(self, portfolioid):
+        cur = self.get_cursor()
+        shares = portfolio_shares(cur, portfolioid)
+        self.close_cursor()
+
+        query = """
+WITH
+portfolio_sum AS(
+    SELECT
+            SUM(CASE
+            """
+        for share in shares:
+            symbol = share[0]
+            n = share[1]
+            query += f'WHEN stocks.symbol = "{symbol}" THEN stocks.open * {n}\n'
+        query += """
+        ELSE 0
+    END) AS open,
+        SUM(CASE
+            """
+        for share in shares:
+            symbol = share[0]
+            n = share[1]
+            query += f'WHEN stocks.symbol = "{symbol}" THEN stocks.close * {n}\n'
+        query += """
+    END) AS close
+    FROM stocks JOIN positions ON stocks.symbol = positions.symbol WHERE positions.portfolio_id = ? GROUP BY stocks.unixtimestamp ORDER BY unixtimestamp
+),
+portfolio_var AS(
+    SELECT
+        (portfolio_sum.close - portfolio_sum.open) / portfolio_sum.open AS var
+    FROM portfolio_sum
+)
+SELECT
+    AVG(var),
+    AVG(var*var)
+FROM portfolio_var
+     """
+        cur = self.get_cursor()
+        cur.execute(query, [portfolioid])
+        result = cur.fetchone()
+        self.close_cursor()
+
+        muday = result[0]
+        sig = (result[1] - result[0]**2)**0.5
+
+        # multiply 250 to make it yearly rate
+        # calc stats.lognorm numpy params
+        s = sig**2*250
+        scale = numpy.exp((muday - 0.5*sig**2)*250)
+
+        return {'s': s, 'scale': scale}
+
 
 class Portfolio(AbstractResource):
     END_POINTS = ['/portfolios/<userid>']

@@ -22,7 +22,6 @@ def render(portfolioid):
     st.header(f"{portfolios['portfolio'][portfolioid - 1][1]}")
 
     # Portofolio timeseries stat
-
     returns = requests.get(f"http://127.0.0.1:5000/returns/{userid}").json()
     symbols = sorted(list(set(status["symbol"] for status in returns[portfolioid - 1]["stocks"])))
 
