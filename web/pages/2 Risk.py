@@ -12,10 +12,10 @@ st.set_page_config(page_title="Risk analysis", page_icon="📈", layout="wide")
 
 st.markdown(HIDE_ST_STYLE, unsafe_allow_html=True)
 
-portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Prtfolio3"])
+portfolio1, portfolio2 = st.tabs(["Portfolio1", "Portfolio2"])
 
-with portfolio1:
-    gbmparam = requests.get(f"http://127.0.0.1:5000/portfolios/1/gbmparam").json()
+def render(portfolioid):
+    gbmparam = requests.get(f"http://127.0.0.1:5000/portfolios/{portfolioid}/gbmparam").json()
     s = gbmparam['s']
     scale = gbmparam['scale']
 
@@ -59,3 +59,10 @@ with portfolio1:
     ).configure_facet(spacing=4).configure_view(stroke=None).properties(width=70)
 
     st.altair_chart(alt_chart)
+
+with portfolio1:
+    render(1)
+
+with portfolio2:
+    render(2)
+

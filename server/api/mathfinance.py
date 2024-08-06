@@ -30,7 +30,7 @@ class GBMplot(AbstractResource):
         _scale = request.args.get('scale', default=None, type=float)
         _S0 = request.args.get('S0', default=1.0, type=float)
         ax_from = request.args.get('ax_from', default=0.5, type=float)
-        ax_to = request.args.get('ax_to', default=4, type=float)
+        ax_to = request.args.get('ax_to', default=6, type=float)
 
         axis = _S0*np.linspace(ax_from, ax_to, 200)
 
