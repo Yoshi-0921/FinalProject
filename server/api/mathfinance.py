@@ -32,7 +32,7 @@ class GBMplot(AbstractResource):
         ax_from = request.args.get('ax_from', default=0.5, type=float)
         ax_to = request.args.get('ax_to', default=4, type=float)
 
-        axis = _S0*np.linspace(ax_from, ax_to, 30)
+        axis = _S0*np.linspace(ax_from, ax_to, 200)
 
         resp = {
             'axis': axis.tolist(),
@@ -46,7 +46,8 @@ class GBMplot(AbstractResource):
             scale = _scale**year
             dist = stats.lognorm(s=s, scale=scale)
             any_loss_prob = dist.cdf(1.0) - dist.cdf(0.0)
-            pdf_vals = dist.pdf(axis).tolist()
+            np_pdf_vals = dist.pdf(axis)
+            pdf_vals = (np_pdf_vals / np.max(np_pdf_vals)).tolist()
 
             reject_prob = 0.10
             q_ub = dist.ppf(q=1.0-reject_prob/2)
