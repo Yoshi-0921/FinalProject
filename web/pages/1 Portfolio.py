@@ -134,9 +134,9 @@ with portfolio1:
             try:
                 timestamp = timestamps.index(status["position_time"])
             except ValueError:
-                timestamp = len(df)
-            bdf = df[timestamp:]
-            hdf = df[:timestamp]
+                timestamp = 0 # len(df)
+            bdf = df[:timestamp]
+            hdf = df[timestamp:]
 
             macd = MACD(close=df['close'],
                     window_slow=26,
@@ -157,8 +157,8 @@ with portfolio1:
                         low=bdf["low"],
                         close=bdf["close"],
                         name="Backtest",
-                        increasing={'fillcolor': "#99703D", 'line':{"color": "#99703D"}},
-                        decreasing={'fillcolor': "#4136FF", 'line':{"color": "#4136FF"}}
+                        increasing=dict(fillcolor="#99703D", line=dict(color="#99703D")),
+                        decreasing=dict(fillcolor="#4136FF", line=dict(color="#4136FF"))
                     ), row=1, col=1)
             fig.add_trace(
                 go.Candlestick(
@@ -168,8 +168,8 @@ with portfolio1:
                         low=hdf["low"],
                         close=hdf["close"],
                         name="Holding",
-                        increasing={'fillcolor': "#3D9970", 'line':{"color": "#3D9970"}},
-                        decreasing={'fillcolor': "#FF4136", 'line':{"color": "#FF4136"}}
+                        increasing=dict(fillcolor="#3D9970", line=dict(color="#3D9970")),
+                        decreasing=dict(fillcolor="#FF4136", line=dict(color="#FF4136"))
                     ), row=1, col=1
             )
             fig.add_trace(
@@ -190,6 +190,8 @@ with portfolio1:
                         name='MA 20'
                     ), row=1, col=1
             )
+            fig.add_hline(y=df['close'][timestamp], line=dict(color='tomato', width=2), row=1, col=1)
+
 
             fig.add_trace(go.Bar(x=[datetime.fromtimestamp(ts) for ts in timestamps],
                                 y=df['volume']
