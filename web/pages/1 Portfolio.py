@@ -71,11 +71,11 @@ with portfolio1:
 
         if symbol == "Net worth":
             char_data = 0
-            for s in symbols:
+            for s_idx, s in enumerate(symbols):
                 stocks = requests.get(
                     f"http://127.0.0.1:5000/stocks/{s}?limit={limit_conversion[limit]}"
                 ).json()
-                char_data += returns[0]["stocks"][symbols.index(s)][
+                char_data += returns[0]["stocks"][s_idx][
                     "shares"
                 ] * np.asarray([s[6] for s in stocks["stocks"]])
             df = pd.DataFrame(
@@ -229,7 +229,8 @@ with portfolio1:
         if symbol == "Net worth":
             query = "Market today"
         else:
-            query = f"{symbol} Market"
+            company_conversion = {"AAPL": "Apple Inc", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft"}
+            query = f"{company_conversion[symbol]}"
         news = requests.get(
             f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
         ).json()
