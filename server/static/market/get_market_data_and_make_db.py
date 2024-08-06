@@ -27,9 +27,10 @@ def insert_into_db(symbol):
         cur.execute(query)
     conn.commit()
 
-symbols = ["NVDA", "AAPL", "MS", "MSFT", "AMZN", "TSLA", "META", "GOOG", "BRK-B", "XOM", "JNJ", "ARM", "^TNX"]
+#symbols = ["NVDA", "AAPL", "MS", "MSFT", "AMZN", "TSLA", "META", "GOOG", "BRK-B", "XOM", "JNJ", "ARM", "^TNX"]
+symbols = ["^NDX", "SPY"]
 
 for symbol in symbols:
-    # save_market_data(symbol)
+    save_market_data(symbol)
     insert_into_db(symbol)
 conn.close()
