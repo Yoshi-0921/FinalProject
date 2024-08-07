@@ -5,18 +5,6 @@ from functools import wraps
 import time
 import numpy
 
-# For profiling
-def timeit(func):
-    @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        total_time = end_time - start_time
-        print(f'Function {func.__name__}{args} {kwargs} Took {total_time:.4f} seconds')
-        return result
-    return timeit_wrapper
-
 class PortfolioReturns(AbstractResource):
     END_POINTS = ['/returns/<userid>']
 
@@ -40,57 +28,6 @@ class PortfolioGBMParam(AbstractResource):
     # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
     END_POINTS = ['/portfolios/<portfolioid>/gbmparam']
 
-    @timeit
-    def get(self, portfolioid):
-        cur = self.get_cursor()
-        shares = portfolio_shares(cur, portfolioid)
-        self.close_cursor()
-
-        query = """
-SELECT
-	SUM(CASE
-        """
-        for share in shares:
-            symbol = share[0]
-            n = share[1]
-            query += f'WHEN stocks.symbol = "{symbol}" THEN stocks.open * {n}\n'
-        query += """
-    ELSE 0
-END) as open,
-    SUM(CASE
-        """
-        for share in shares:
-            symbol = share[0]
-            n = share[1]
-            query += f'WHEN stocks.symbol = "{symbol}" THEN stocks.close * {n}\n'
-        query += """
-END) as close
-FROM stocks JOIN positions ON stocks.symbol = positions.symbol WHERE positions.portfolio_id = ? GROUP BY stocks.unixtimestamp ORDER BY unixtimestamp;
-     """
-        cur = self.get_cursor()
-        cur.execute(query, [portfolioid])
-        result = cur.fetchall()
-        self.close_cursor()
-
-        samples = []
-        for stamp in result:
-            open = stamp[0]
-            close = stamp[1]
-            samples.append((close - open) / open)
-        muday, sig = stats.norm.fit(samples)
-
-        # multiply 250 to make it yearly rate
-        # calc stats.lognorm numpy params
-        s = sig**2*250
-        scale = numpy.exp((muday - 0.5*sig**2)*250)
-
-        return {'s': s, 'scale': scale}
-
-class PortfolioGBMParamFast(AbstractResource):
-    # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
-    END_POINTS = ['/portfolios/<portfolioid>/gbmparamfast']
-
-    @timeit
     def get(self, portfolioid):
         cur = self.get_cursor()
         shares = portfolio_shares(cur, portfolioid)
