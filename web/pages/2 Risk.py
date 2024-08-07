@@ -38,6 +38,22 @@ def render(portfolioid):
         fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), height=230)
         st.plotly_chart(fig, use_container_width=True)
 
+    returns = requests.get(f"http://127.0.0.1:5000/portfolios/{portfolioid}/gbmhist").json()
+    with subcol2:
+        vals = []
+        cnts = []
+        for bin in returns:
+            bucket, low, high, cnt = bin
+            vals.append((low + high)/2)
+            cnts.append(cnt)
+        df = pd.DataFrame({'val': vals, 'cnt': cnts})
+        alt_chart = alt.Chart(df).mark_bar().encode(
+            x=alt.X('val:Q', title='Variability'),
+            y=alt.Y('cnt:Q', title='Occurence')
+        )
+        st.altair_chart(alt_chart)
+
+
     # Time evolution plot
     gbmparam = requests.get(f"http://127.0.0.1:5000/portfolios/{portfolioid}/gbmparam").json()
     s = gbmparam['s']
@@ -75,7 +91,7 @@ def render(portfolioid):
             alt.Tooltip(title="25pctile", field='q25', format=".2f"),
             alt.Tooltip(title="75pctile", field='q75', format=".2f")
         ]
-    ).configure_facet(spacing=4).configure_view(stroke=None).properties(width=70)
+    ).configure_facet(spacing=3).configure_view(stroke=None).properties(width=50)
 
     st.altair_chart(alt_chart)
 
