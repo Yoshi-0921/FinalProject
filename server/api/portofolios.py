@@ -63,7 +63,9 @@ portfolio_var AS(
 )
 SELECT
     AVG(var),
-    AVG(var*var)
+    AVG(var*var),
+    AVG(var*var*var),
+    AVG(var*var*var*var)
 FROM portfolio_var
      """
         cur = self.get_cursor()
@@ -74,12 +76,20 @@ FROM portfolio_var
         muday = result[0]
         sig = (result[1] - result[0]**2)**0.5
 
+        mean = result[0]
+        meanpow2 = result[1]
+        meanpow3 = result[2]
+        meanpow4 = result[3]
+
+        skew = (meanpow3 - 3*mean*meanpow2 + 2*mean**3)/sig**3
+        kurt = (meanpow4 - 4*mean*meanpow3 + 6*mean**2*meanpow2 - 3*mean**4)/sig**4 - 6
+
         # multiply 250 to make it yearly rate
         # calc stats.lognorm numpy params
         s = sig**2*250
         scale = numpy.exp((muday - 0.5*sig**2)*250)
 
-        return {'s': s, 'scale': scale}
+        return {'s': s, 'scale': scale, 'mean': mean, 'sig': sig, 'skew': skew, 'kurt': kurt}
 
 class PortfolioGBMHist(AbstractResource):
     # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
