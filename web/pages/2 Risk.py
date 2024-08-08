@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 import plotly.graph_objs as go
+from scipy import stats
 
 from common import HIDE_ST_STYLE
 
@@ -21,12 +22,13 @@ def render(portfolioid):
 
     st.header(f"{portfolios['portfolio'][portfolioid - 1][1]}")
 
-    # Portofolio timeseries stat
     returns = requests.get(f"http://127.0.0.1:5000/returns/{userid}").json()
     symbols = sorted(list(set(status["symbol"] for status in returns[portfolioid - 1]["stocks"])))
 
-    subcol1, subcol2 = st.columns([2, 3])
+    subcol1, subcol2, subcol3 = st.columns([2, 2, 2])
+    # Portofolio composition plot
     with subcol1:
+        st.subheader("Composition")
         fig = go.Figure(
             go.Sunburst(
                 labels=symbols,
@@ -38,24 +40,70 @@ def render(portfolioid):
         fig.update_layout(margin=dict(t=0, l=0, r=0, b=0), height=230)
         st.plotly_chart(fig, use_container_width=True)
 
+    gbmparam = requests.get(f"http://127.0.0.1:5000/portfolios/{portfolioid}/gbmparam").json()
+
+    # Variance histogram
     returns = requests.get(f"http://127.0.0.1:5000/portfolios/{portfolioid}/gbmhist").json()
     with subcol2:
         vals = []
         cnts = []
+        w = 0
         for bin in returns:
             bucket, low, high, cnt = bin
             vals.append((low + high)/2)
             cnts.append(cnt)
-        df = pd.DataFrame({'val': vals, 'cnt': cnts})
-        alt_chart = alt.Chart(df).mark_bar().encode(
+            w = high - low
+
+        mean = gbmparam['mean']
+        sig = gbmparam['sig']
+        normal_dist = stats.norm(mean, sig).pdf(vals)
+        normal_dist = normal_dist * w * np.sum(cnts)
+
+        df = pd.DataFrame({'val': vals, 'cnt': cnts, 'normal_dist': normal_dist})
+        alt_hist = alt.Chart(df).mark_bar().encode(
             x=alt.X('val:Q', title='Variability'),
             y=alt.Y('cnt:Q', title='Occurence')
         )
-        st.altair_chart(alt_chart)
+        alt_norm = alt.Chart(df).mark_line().encode(
+            x=alt.X('val:Q', title='Variability'),
+            y=alt.Y('normal_dist:Q', title='Occurence'),
+            opacity=alt.value(0.6),
+            color=alt.value('orange')
+        )
+        st.subheader("Intraday variance histogram")
+        st.altair_chart(alt.layer(alt_hist, alt_norm).properties(height=300, width=400))
 
+    with subcol3:
+        mean = gbmparam['mean']
+        sig = gbmparam['sig']
+        skew = gbmparam['skew']
+        kurt = gbmparam['kurt']
+        gbmplot = requests.get(f"http://127.0.0.1:5000/mathfinance/gbmEWplot?mean={mean}&sig={sig}").json()
+        gbmEWplot = requests.get(f"http://127.0.0.1:5000/mathfinance/gbmEWplot?mean={mean}&sig={sig}&skew={skew}&kurt={kurt}").json()
+        df = pd.DataFrame({'val': gbmplot['axis'], 'normal': gbmplot['pdf_vals'], 'ew': gbmEWplot['pdf_vals']})
+        alt_chart_normal = alt.Chart(df).mark_area().encode(
+            x=alt.X('val:Q', title='Value'),
+            y=alt.Y('normal:Q', title='20-year Probability'),
+            opacity=alt.value(0.4),
+            color=alt.value('orange'),
+            tooltip=[
+                alt.Tooltip(title="Normal PDF", field='val', format=".4f")
+            ]
+        )
+        alt_chart_EW= alt.Chart(df).mark_area().encode(
+            x=alt.X('val:Q', title='Value'),
+            y=alt.Y('ew:Q', title='20-year Probability'),
+            opacity=alt.value(0.3),
+            color=alt.value('green'),
+            tooltip=[
+                alt.Tooltip(title="Edgeworth 4th PDF", field='val', format=".4f")
+            ]
+        )
+        st.subheader(":orange[Normal] vs. :green[Higher moment aware]")
+        st.altair_chart(alt.layer(alt_chart_normal, alt_chart_EW).properties(height=300, width=400))
 
+    st.subheader("20-year forecast")
     # Time evolution plot
-    gbmparam = requests.get(f"http://127.0.0.1:5000/portfolios/{portfolioid}/gbmparam").json()
     s = gbmparam['s']
     scale = gbmparam['scale']
 

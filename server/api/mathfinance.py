@@ -69,3 +69,57 @@ class GBMplot(AbstractResource):
             })
 
         return resp
+
+class GBMWithEdgeworthPlot(AbstractResource):
+    END_POINTS = ['/mathfinance/gbmEWplot']
+
+    @api.doc(params={
+        'mean': {
+            'type': 'float'
+        },
+        'sig': {
+            'type': 'float'
+        },
+        'skew': {
+            'type': 'float'
+        },
+        'kurt': {
+            'type': 'float'
+        },
+        'S0': {
+            'type': 'float'
+        },
+        'year': {
+            'type': 'float'
+        }})
+    def get(self):
+        mean = request.args.get('mean', default=0.0, type=float)
+        sig= request.args.get('sig', default=1.0, type=float)
+        skew= request.args.get('skew', default=0.0, type=float)
+        kurt= request.args.get('kurt', default=0.0, type=float)
+        _S0 = request.args.get('S0', default=1.0, type=float)
+        year= request.args.get('year', default=20, type=float)
+
+        axis = _S0*np.linspace(0.1, 10, 200)
+
+        resp = {
+            'axis' : axis.tolist(),
+            'pdf_vals': []
+        }
+
+        def edgeworth(samples, mu, sig, skew, kurt):
+            H3 = lambda x: x**3 - 3*x
+            H4 = lambda x: x**4 - 6*x**2 + 3
+            z = (samples - mu) / sig
+            val = stats.norm(mu, sig).pdf(samples)*(1 + 1/6*skew*H3(z) + 1/24*kurt*H4(z))
+            s = np.sum(val) * (samples[1] - samples[0])
+            val /= s
+            return list(map(lambda x: x if x >= 1e-20 else 1e-20, val))
+
+        def log_edgeworth(samples, mu, sig, skew, kurt):
+            return edgeworth(np.log(samples), mu, sig, skew, kurt) / samples
+
+        logpdfs = log_edgeworth(axis, (mean - 0.5*sig**2) * 250*year, sig**2 * (250*year), skew, kurt)
+        resp['pdf_vals'] = logpdfs.tolist()
+
+        return resp
