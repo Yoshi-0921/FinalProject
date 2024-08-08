@@ -5,28 +5,34 @@ from functools import wraps
 import time
 import numpy
 
+
 class PortfolioReturns(AbstractResource):
-    END_POINTS = ['/returns/<userid>']
+    END_POINTS = ["/returns/<userid>"]
 
     def get(self, userid):
         return get_portfolio_returns(userid)
 
+
 def portfolio_shares(cur, portfolio_id):
-    cur.execute('SELECT symbol, shares from positions where portfolio_id = ?;', [portfolio_id])
+    cur.execute(
+        "SELECT symbol, shares from positions where portfolio_id = ?;", [portfolio_id]
+    )
     result = cur.fetchall()
     return result
 
+
 class PortfolioShares(AbstractResource):
-    END_POINTS = ['/portfolios/<portfolioid>/shares']
+    END_POINTS = ["/portfolios/<portfolioid>/shares"]
 
     def get(self, portfolioid):
         result = portfolio_shares(self.get_cursor(), portfolioid)
         self.close_cursor()
         return result
 
+
 class PortfolioGBMParam(AbstractResource):
     # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
-    END_POINTS = ['/portfolios/<portfolioid>/gbmparam']
+    END_POINTS = ["/portfolios/<portfolioid>/gbmparam"]
 
     def get(self, portfolioid):
         cur = self.get_cursor()
@@ -74,7 +80,7 @@ FROM portfolio_var
         self.close_cursor()
 
         muday = result[0]
-        sig = (result[1] - result[0]**2)**0.5
+        sig = (result[1] - result[0] ** 2) ** 0.5
 
         mean = result[0]
         meanpow2 = result[1]
@@ -86,14 +92,14 @@ FROM portfolio_var
 
         # multiply 250 to make it yearly rate
         # calc stats.lognorm numpy params
-        s = sig**2*250
-        scale = numpy.exp((muday - 0.5*sig**2)*250)
+        s = sig**2 * 250
+        scale = numpy.exp((muday - 0.5 * sig**2) * 250)
 
         return {'s': s, 'scale': scale, 'mean': mean, 'sig': sig, 'skew': skew, 'kurt': kurt}
 
 class PortfolioGBMHist(AbstractResource):
     # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
-    END_POINTS = ['/portfolios/<portfolioid>/gbmhist']
+    END_POINTS = ["/portfolios/<portfolioid>/gbmhist"]
 
     def get(self, portfolioid):
         cur = self.get_cursor()
@@ -158,12 +164,17 @@ ORDER BY bucket
 
         return result
 
+
 class Portfolio(AbstractResource):
-    END_POINTS = ['/portfolios/<userid>']
+    END_POINTS = ["/portfolios/<userid>"]
 
     def get(self, userid):
         cur = self.get_cursor()
-        cur.execute('SELECT * FROM portfolios JOIN users ON portfolios.user_id = users.id WHERE users.userid == ?', [userid])
+        cur.execute(
+            "SELECT * FROM portfolios JOIN users ON portfolios.user_id = users.id WHERE users.userid == ?",
+            [userid],
+        )
         result = cur.fetchall()
+        print(result)
         self.close_cursor()
-        return {'portfolio': result}
+        return {"portfolio": result}

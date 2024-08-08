@@ -23,15 +23,15 @@ userid = "weimeng"
 portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
 portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Portfolio3"])
-limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "5Y": 1825, "Max": 9999}
-company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index", "AMD": "AMD", "TSM": "Taiwan Semiconductor Manufacturing Company", "META": "Meta", "TSLA": "Tesla"}
+limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "3Y":1095, "5Y": 1825, "Max": 9999}
+company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index", "AMD": "AMD", "TSM": "Taiwan Semiconductor Manufacturing Company", "META": "Meta", "TSLA": "Tesla", "SFTBY": "Softbank"}
 
 def portfolio_page(portfolio_idx):
     import numpy as np
     COL1, COL2 = st.columns([3, 2])
     with COL1:
         returns = requests.get(f"http://127.0.0.1:5000/returns/{userid}").json()
-        symbols = sorted(list(set(status["symbol"] for status in returns[portfolio_idx]["stocks"])))
+        symbols = [status["symbol"] for status in returns[portfolio_idx]["stocks"]] # sorted(list(set(status["symbol"] for status in returns[portfolio_idx]["stocks"])))
 
         col1, col2 = st.columns([3, 1])
         with col1:
@@ -52,7 +52,7 @@ def portfolio_page(portfolio_idx):
             b2.metric("Return", "$" + f"{status['return']:.2f}")
             b3.metric("Share", f"{status['shares']}")
             limit = b4.select_slider(
-                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M", key=f"select_slider_stock_{portfolio_idx}"
+                "Date range", ["1W", "1M", "6M", "1Y", "3Y", "5Y", "Max"], "1Y", key=f"select_slider_stock_{portfolio_idx}"
             )
         else:
             _value, _return = 0, 0
@@ -67,7 +67,7 @@ def portfolio_page(portfolio_idx):
             )
             b2.metric("Return", "$" + f"{_return:.2f}")
             limit = b3.select_slider(
-                "Date range", ["1W", "1M", "6M", "1Y", "5Y", "Max"], "1M", key=f"select_slider_{portfolio_idx}"
+                "Date range", ["1W", "1M", "6M", "1Y", "3Y", "5Y", "Max"], "1Y", key=f"select_slider_{portfolio_idx}"
             )
 
         if symbol == "Net worth":
@@ -93,9 +93,9 @@ def portfolio_page(portfolio_idx):
             with subcol1:
                 fig = go.Figure(
                     go.Sunburst(
-                        labels=symbols,
+                        labels=[s["symbol"] for s in returns[portfolio_idx]["stocks"]],
                         parents=["stock" for _ in range(len(symbols))],
-                        values=[s["value"] for s in returns[portfolio_idx]["stocks"]],
+                        values=[s["value"]*s["shares"] for s in returns[portfolio_idx]["stocks"]],
                     )
                 )
                 fig.update_traces(textinfo="label+percent parent")

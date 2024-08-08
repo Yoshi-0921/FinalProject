@@ -5,8 +5,9 @@ from types import FunctionType
 from .database import DatabaseTools
 from .news import NewsTools
 from .yahoo import YahooFinanceTools
+from .portfolio import PortfolioTools
 
-TOOL_CATEGORIES = [NewsTools, DatabaseTools, YahooFinanceTools]
+TOOL_CATEGORIES = [NewsTools, DatabaseTools, YahooFinanceTools, PortfolioTools]
 
 
 def get_static_methods(cls):
