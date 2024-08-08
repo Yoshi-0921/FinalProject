@@ -47,15 +47,17 @@ def render(portfolioid):
     with subcol2:
         vals = []
         cnts = []
+        w = 0
         for bin in returns:
             bucket, low, high, cnt = bin
             vals.append((low + high)/2)
             cnts.append(cnt)
+            w = high - low
 
         mean = gbmparam['mean']
         sig = gbmparam['sig']
         normal_dist = stats.norm(mean, sig).pdf(vals)
-        normal_dist = normal_dist / np.max(normal_dist) * np.max(cnts)
+        normal_dist = normal_dist * w * np.sum(cnts)
 
         df = pd.DataFrame({'val': vals, 'cnt': cnts, 'normal_dist': normal_dist})
         alt_hist = alt.Chart(df).mark_bar().encode(
@@ -81,7 +83,7 @@ def render(portfolioid):
         df = pd.DataFrame({'val': gbmplot['axis'], 'normal': gbmplot['pdf_vals'], 'ew': gbmEWplot['pdf_vals']})
         alt_chart_normal = alt.Chart(df).mark_area().encode(
             x=alt.X('val:Q', title='Value'),
-            y=alt.Y('normal:Q', title='Probability'),
+            y=alt.Y('normal:Q', title='20-year Probability'),
             opacity=alt.value(0.4),
             color=alt.value('orange'),
             tooltip=[
@@ -90,7 +92,7 @@ def render(portfolioid):
         )
         alt_chart_EW= alt.Chart(df).mark_area().encode(
             x=alt.X('val:Q', title='Value'),
-            y=alt.Y('ew:Q', title='Probability'),
+            y=alt.Y('ew:Q', title='20-year Probability'),
             opacity=alt.value(0.3),
             color=alt.value('green'),
             tooltip=[
