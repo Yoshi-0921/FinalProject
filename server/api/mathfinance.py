@@ -93,14 +93,14 @@ class GBMWithEdgeworthPlot(AbstractResource):
             'type': 'float'
         }})
     def get(self):
-        mean = request.args.get('mean', default=None, type=float)
-        sig= request.args.get('sig', default=None, type=float)
-        skew= request.args.get('skew', default=None, type=float)
-        kurt= request.args.get('kurt', default=None, type=float)
+        mean = request.args.get('mean', default=0.0, type=float)
+        sig= request.args.get('sig', default=1.0, type=float)
+        skew= request.args.get('skew', default=0.0, type=float)
+        kurt= request.args.get('kurt', default=0.0, type=float)
         _S0 = request.args.get('S0', default=1.0, type=float)
         year= request.args.get('year', default=20, type=float)
 
-        axis = _S0*np.linspace(0.1, 6, 200)
+        axis = _S0*np.linspace(0.1, 10, 200)
 
         resp = {
             'axis' : axis.tolist(),
