@@ -37,3 +37,5 @@ database_schema_string = "\n".join(
         for table in database_schema_dict
     ]
 )
+
+print(database_schema_string)
