@@ -4,6 +4,8 @@ import streamlit as st
 from chat import OpenAIClientWrapper
 from config import OPENAI_API_KEY
 
+st.set_page_config(page_title="Chat", page_icon="🤖", layout="wide")
+
 # # Initialize session state if not already done
 if "OPENAI_API_KEY" not in st.session_state:
     st.session_state["OPENAI_API_KEY"] = None
