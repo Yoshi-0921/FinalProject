@@ -22,9 +22,9 @@ st.markdown(HIDE_ST_STYLE, unsafe_allow_html=True)
 userid = "weimeng"
 portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
-portfolio1, portfolio2 = st.tabs(["Portfolio1", "Portfolio2"])
+portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Portfolio3"])
 limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "5Y": 1825, "Max": 9999}
-company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index"}
+company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index", "AMD": "AMD", "TSM": "Taiwan Semiconductor Manufacturing Company", "META": "Meta", "TSLA": "Tesla"}
 
 def portfolio_page(portfolio_idx):
     import numpy as np
@@ -257,3 +257,6 @@ with portfolio1:
 
 with portfolio2:
     portfolio_page(1)
+
+with portfolio3:
+    portfolio_page(2)
