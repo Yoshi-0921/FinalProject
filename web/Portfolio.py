@@ -15,7 +15,7 @@ from common import HIDE_ST_STYLE
 from config import NEWS_API_KEY
 
 
-st.set_page_config(page_icon=":star", layout="wide")
+st.set_page_config(page_title="Portfolio", page_icon="💰", layout="wide")
 
 st.markdown(HIDE_ST_STYLE, unsafe_allow_html=True)
 
@@ -24,7 +24,7 @@ portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
 portfolio1, portfolio2 = st.tabs(["Portfolio1", "Portfolio2"])
 limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "5Y": 1825, "Max": 9999}
-company_conversion = {"AAPL": "Apple Inc", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index"}
+company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index"}
 
 def portfolio_page(portfolio_idx):
     import numpy as np
@@ -191,7 +191,8 @@ def portfolio_page(portfolio_idx):
                         name='MA 20'
                     ), row=1, col=1
             )
-            fig.add_hline(y=df['close'][timestamp], line=dict(color='tomato', width=2), row=1, col=1)
+            if timestamp != 0:
+                fig.add_hline(y=df['close'][timestamp], line=dict(color='tomato', width=2), row=1, col=1)
 
 
             fig.add_trace(go.Bar(x=[datetime.fromtimestamp(ts) for ts in timestamps],
@@ -230,7 +231,7 @@ def portfolio_page(portfolio_idx):
         if symbol == "Net worth":
             query = "Market today"
         else:
-            query = f"{company_conversion[symbol]}"
+            query = f"{company_conversion[symbol]} Market"
         news = requests.get(
             f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
         ).json()
