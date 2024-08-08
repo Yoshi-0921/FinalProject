@@ -39,3 +39,4 @@ api.add_resource(PortfolioReturns, *PortfolioReturns.END_POINTS)
 # ------------- MATH ---------------
 from .mathfinance import *
 api.add_resource(GBMplot, *GBMplot.END_POINTS)
+api.add_resource(GBMWithEdgeworthPlot, *GBMWithEdgeworthPlot.END_POINTS)
