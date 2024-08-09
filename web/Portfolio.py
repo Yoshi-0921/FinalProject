@@ -24,7 +24,7 @@ portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
 portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Portfolio3"])
 limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "3Y":1095, "5Y": 1825, "Max": 9999}
-company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index", "AMD": "AMD", "TSM": "Taiwan Semiconductor Manufacturing Company", "META": "Meta", "TSLA": "Tesla", "SFTBY": "Softbank"}
+company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index", "AMD": "AMD", "TSM": "TSMC", "META": "Meta", "TSLA": "Tesla", "SFTBY": "Softbank"}
 
 def portfolio_page(portfolio_idx):
     import numpy as np
@@ -95,7 +95,7 @@ def portfolio_page(portfolio_idx):
                     go.Sunburst(
                         labels=[s["symbol"] for s in returns[portfolio_idx]["stocks"]],
                         parents=["stock" for _ in range(len(symbols))],
-                        values=[s["value"]*s["shares"] for s in returns[portfolio_idx]["stocks"]],
+                        values=[s["value"] for s in returns[portfolio_idx]["stocks"]],
                     )
                 )
                 fig.update_traces(textinfo="label+percent parent")
@@ -233,7 +233,7 @@ def portfolio_page(portfolio_idx):
         else:
             query = f"{company_conversion[symbol]} Market"
         news = requests.get(
-            f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
+            f"https://newsapi.org/v2/everything?q={query}&sortBy=relevancy&apiKey={NEWS_API_KEY}&language=en"
         ).json()
         for i in range(feed):
             story = news["articles"][i]
