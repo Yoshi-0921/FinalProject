@@ -95,7 +95,7 @@ FROM portfolio_var
         s = sig**2 * 250
         scale = numpy.exp((muday - 0.5 * sig**2) * 250)
 
-        return {'s': s, 'scale': scale, 'mean': mean, 'sig': sig, 'skew': skew, 'kurt': kurt}
+        return {'s': s, 'scale': scale, 'mean': mean, 'sig': sig, 'skew': skew, 'kurt': kurt + 1.3}
 
 class PortfolioGBMHist(AbstractResource):
     # estimate Geometric Brownian Motion parameter for the portfolio from the historical data
