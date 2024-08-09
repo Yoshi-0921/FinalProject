@@ -22,7 +22,8 @@ st.markdown(HIDE_ST_STYLE, unsafe_allow_html=True)
 userid = "weimeng"
 portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
 
-portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Portfolio3"])
+portfolio1, portfolio2, portfolio3 = st.tabs([p[1][10:] for p in portfolios['portfolio']])
+
 limit_conversion = {"1W": 7, "1M": 30, "6M": 180, "1Y": 365, "3Y":1095, "5Y": 1825, "Max": 9999}
 company_conversion = {"AAPL": "Apple", "JNJ": "Johnson and Johnson", "NVDA": "Nvidia", "MS": "Morgan Stanley", "MSFT": "Microsoft", "SPY": "S&P 500 Index", "^NDX": "NASDAQ Index", "AMD": "AMD", "TSM": "TSMC", "META": "Meta", "TSLA": "Tesla", "SFTBY": "Softbank"}
 

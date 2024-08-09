@@ -15,8 +15,10 @@ st.set_page_config(page_title="Risk analysis", page_icon="📈", layout="wide")
 st.markdown(HIDE_ST_STYLE, unsafe_allow_html=True)
 
 userid = "weimeng"
-portfolio1, portfolio2, portfolio3 = st.tabs(["Portfolio1", "Portfolio2", "Portfolio3"])
 portfolios = requests.get(f"http://127.0.0.1:5000/portfolios/{userid}").json()
+
+portfolio1, portfolio2, portfolio3 = st.tabs([p[1][10:] for p in portfolios['portfolio']])
+
 
 def render(portfolioid):
 
